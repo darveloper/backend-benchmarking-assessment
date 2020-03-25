@@ -9,16 +9,17 @@ for an arbitrary list of strings.
 """
 
 import sys
+from collections import defaultdict
 
 # Your name here, and any other people/sources who helped.
 # Give credit where credit is due.
-__author__ = "???"
+__author__ = "Darlyze Calixte & Brandi Cotton"
 
 
 def alphabetize(string):
     """Returns alphabetized version of the string"""
     return "".join(sorted(string.lower()))
-
+    
 
 def find_anagrams(words):
     """
@@ -27,14 +28,30 @@ def find_anagrams(words):
     Example:
     {'dgo': ['dog'], 'act': ['cat', 'act']}
     """
-    anagrams = {
-        alphabetize(word): [
-            w for w in words
-            if alphabetize(w) == alphabetize(word)]
-        for word in words}
+    anagrams = defaultdict(list)
+    for word in words:
+        anagrams[alphabetize(word)].append(word)
     return anagrams
 
+import cProfile, pstats
+from io import BytesIO as StringIO
 
+def profile(fnc):
+    def inner(*args, **kwargs):
+
+        pr = cProfile.Profile()
+        pr.enable()
+        retval = fnc(*args, **kwargs)
+        pr.disable()
+        s = StringIO()
+        sortby = 'cumulative'
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+    return inner
+
+@profile
 def main(args):
     # run find_anagrams() on first argument filename
     if len(args) < 1:
